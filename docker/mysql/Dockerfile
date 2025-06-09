@@ -1,9 +1,8 @@
-# our base image
-FROM mysql:5.7.28
-
-# specify the port number the container should expose
-EXPOSE 3306
+FROM mysql:8.0-debian
 
 USER root
-RUN apt-get update -y
-RUN apt-get install -y apt-utils
+
+RUN apt-get update && \
+    apt-get install -y apt-utils
+EXPOSE 3306
+

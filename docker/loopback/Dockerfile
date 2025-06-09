@@ -1,20 +1,25 @@
-# our base image
 FROM node:14
 
-# specify the port number the container should expose
 EXPOSE 3001
 
-# User user as root
 USER root
+WORKDIR /app
 
-# Create App
-RUN mkdir /app
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Update Linux Packages
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install mysql-client -y
+# Instala wget, gnupg e adiciona o repositório MySQL 8.x
+RUN apt-get update && \
+    apt-get install -y wget gnupg lsb-release && \
+    wget https://dev.mysql.com/get/mysql-apt-config_0.8.30-1_all.deb && \
+    echo "mysql-apt-config mysql-apt-config/select-server select mysql-8.0" | \
+      DEBIAN_FRONTEND=noninteractive debconf-set-selections && \
+    dpkg -i mysql-apt-config_0.8.30-1_all.deb && \
+    rm mysql-apt-config_0.8.30-1_all.deb && \
+    apt-get update && \
+    apt-get install -y mysql-client && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Run update and Strongloop install
-RUN npm install -g npm
-RUN npm install -g pm2
-RUN pm2 install pm2-logrotate
+# npm 8 é a última versão compatível com Node 14
+RUN npm install -g npm@8 pm2 && \
+    pm2 install pm2-logrotate
